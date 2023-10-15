@@ -1,11 +1,27 @@
 import { useState, useCallback } from 'react';
-import { IHttpHook } from './interfaces';
+
+
+interface IHttpHook {
+  loading: boolean;
+  error: string | null;
+  request: (
+    url: string,
+    method?: string,
+    body?: any,
+    headers?: Record<string, string>
+  ) => Promise<any>;
+  clearError: () => void;
+}
 
 export const useHttp = (): IHttpHook => {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  const request = useCallback( async(url: string,method: string = 'GET',body: any = null, headers: Record<string, string> = {})
+  const request = useCallback( async(
+    url: string,
+    method: string = 'GET',
+    body: any = null, 
+    headers: Record<string, string> = {})
   : Promise<any> => {
       setLoading(true)
 

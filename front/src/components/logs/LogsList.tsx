@@ -1,16 +1,17 @@
 import React from "react";
-import { ILogsListProps } from "./interfaces";
 import { List, Button } from 'antd';
 import { DeleteOutlined } from "@ant-design/icons";
+import { ILog } from "./interfaces";
+
+interface ILogsListProps {
+  logs: ILog[], 
+  onRemove: (id:number) => void
+}
 
 export const LogsList: React.FC<ILogsListProps> = (props) => {
-  // if(logs.length === 0) {
-  //   return <Typography.Paragraph className='center'>There are no tasks here</Typography.Paragraph>
-  // }
 
   const removeHandler = (event: React.MouseEvent, id:number) => {
     event.preventDefault();
-    console.log(id)
     props.onRemove(id)
   }
 
@@ -28,7 +29,7 @@ export const LogsList: React.FC<ILogsListProps> = (props) => {
             <Button
               type="link"
               className="material-symbols-outlined red-text"
-              onClick={(event) => removeHandler(event, log.id)}
+              onClick={(event) => removeHandler(event, log.id!)}
             >
               <DeleteOutlined style={{fontSize: '20px', color:'red'}}/>
             </Button>

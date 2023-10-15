@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { useRoutes } from './routes';
-import { useAuth } from './hooks/auth/auth.hook';
+import { useAuth } from './hooks/auth.hook';
 import { AuthContext } from './context/AuthContext';
-import { AuthContextType } from './context/types';
+import { IAuthContext } from './context/interfaces';
 
 
 const App: React.FC = () => {
@@ -13,7 +13,7 @@ const App: React.FC = () => {
 
   return (
     <AuthContext.Provider value={{
-       token, userId, login, logout, isAuthenticated } as AuthContextType}>
+       token, userId, login, logout, isAuthenticated } as IAuthContext}>
       <Router>
         <div>
           {routes}

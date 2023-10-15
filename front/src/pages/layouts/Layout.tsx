@@ -1,9 +1,12 @@
-import React, { useContext } from 'react';
+import React, { ReactNode, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Typography } from 'antd';
-import { ILayout } from './interfaces';
 import { LogoutOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../context/AuthContext';
+
+interface ILayout {
+  element: ReactNode
+}
 
 
 const { Header, Content, Footer } = Layout;

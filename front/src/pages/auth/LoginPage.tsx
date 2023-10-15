@@ -3,21 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Input, Card, Row, Col, Typography, Divider } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { ILogin } from './interfaces';
-import { ValidationError } from '../../components/validation/ValidationError';
-import { useHttp } from '../../hooks/http/http.hook';
+import { ValidationError } from '../../components/ValidationError';
+import { useHttp } from '../../hooks/http.hook';
 import { message } from 'antd';
-import { AuthContextType } from '../../context/types';
 import { AuthContext } from '../../context/AuthContext';
 import { keys } from '../../config/default';
+import { IAuthContext } from '../../context/interfaces';
+import { useAuthValidation } from '../../hooks/authValidation.hook';
 
 
 export const LoginPage:React.FC = () => {
 
-  const auth = useContext<AuthContextType>(AuthContext)
+  const auth = useContext<IAuthContext>(AuthContext)
   const { loading, error, request, clearError} = useHttp()
 
-  const [validEmail, setValidEmail] = useState<boolean | null>(true)
-  const [validPassword, setValidPassword] = useState<boolean>(true)
+  const { validEmail, validPassword, validateFormLogin } = useAuthValidation()
   const [formData, setFormData] = useState<ILogin>({
     email: '',
     password: '',
@@ -31,49 +31,19 @@ export const LoginPage:React.FC = () => {
       message.open({
           type: 'error',
           content: error
-      });
+      })
       clearError()
     }
   }, [clearError,error])
 
-  const isEmailValid = (email: string): boolean => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
-    return emailRegex.test(email)
-  }
-
-  const handleEmailBlur = () => {
-    if (formData.email === '') {
-      setValidEmail(true)
-    } else {
-      setValidEmail(isEmailValid(formData.email))
-    }
-  }
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault() 
-
-    setValidEmail(true)
-    setFormData({ ...formData, email: e.target.value })
-  }
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-
-    setValidPassword(e.target.value.length >= 6)
-    setFormData({ ...formData, password: e.target.value })
-  }
-
-  const handlePasswordBlur = () => {
-    setValidPassword(formData.password.length >= 6 || formData.password === '')
+  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    setFormData({ ...formData, [e.target.name]: e.target.value})
   }
 
   const handleSubmit = async() => { 
-    if (!isEmailValid(formData.email)) {
-      setValidEmail(false)
-      return
-    }
-    if (formData.password.length < 6) {
-      setValidPassword(false)
+    const { isValidEmail, isValidPassword } = await validateFormLogin(formData)
+
+    if (!isValidPassword || !isValidEmail) {
       return
     }
 
@@ -81,15 +51,15 @@ export const LoginPage:React.FC = () => {
 
       const data = await request(keys.url + '/api/auth/login', 'POST', {...formData})
 
-      auth.login(data.token, data.userId)
-
+      await auth.login(data.token, data.userId)
+      
       message.open({
         type: 'success',
         content: 'Successfull login'
       })
       
     } catch (e) {
-      
+      console.log('error')
     }
   }
 
@@ -108,8 +78,7 @@ export const LoginPage:React.FC = () => {
           name='email'
           className={`mt-1 ${!validEmail ? 'input-error' : ''}`}
           value={formData.email}
-          onChange={handleEmailChange}
-          onBlur={handleEmailBlur}
+          onChange={changeHandler}
         />
         <ValidationError condition={!validEmail} text='Invalid email format.'/>
         <Input.Password
@@ -119,8 +88,7 @@ export const LoginPage:React.FC = () => {
           placeholder="Password"
           className={`mt-1 ${!validPassword ? 'input-error' : ' '}`}
           value={formData.password}
-          onChange={handlePasswordChange}
-          onBlur={handlePasswordBlur}
+          onChange={changeHandler}
         />
         <ValidationError condition={!validPassword} text='Password must be at least 6 characters long.'/>
         <Button 

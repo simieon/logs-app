@@ -2,17 +2,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../sequelize/models')
 const keys = require('../config/keys');
-const { validationResult, body } = require('express-validator')
+const { validationResult} = require('express-validator')
 
 module.exports.login = async (req, res) => {
   try {
     const errors = validationResult(req)
 
     if(!errors.isEmpty()){
-        return res.status(400).json({
-            errors: errors.array(), 
-            message: 'Invalid data while logging in. Please try again'
-        })
+      return res.status(400).json({
+        errors: errors.array(), 
+        message: 'Invalid data while logging in. Please try again'
+      })
     }
 
     const { email, password } = req.body
@@ -24,19 +24,19 @@ module.exports.login = async (req, res) => {
     console.log(user)
 
     if(!user){
-        return res.status(400).json({ message: 'Invalid login or password. Please try again' })
+      return res.status(400).json({ message: 'Invalid login or password. Please try again' })
     }
     
     const isMatch = await bcrypt.compare(password, user.password)
 
     if(!isMatch){
-        return res.status(400).json({ message: 'Invalid login or password. Please try again'})
+      return res.status(400).json({ message: 'Invalid login or password. Please try again'})
     }
 
     const token = jwt.sign(
-        { userId: user.id },
-        keys.jwtSecret,
-        { expiresIn: '1h' }
+      { userId: user.id },
+      keys.jwtSecret,
+      { expiresIn: '1h' }
     )
 
     res.json({ token, userId: user.id })
@@ -50,10 +50,10 @@ module.exports.register = async (req, res) => {
     const errors = validationResult(req)
 
     if(!errors.isEmpty()){
-        return res.status(400).json({
-            errors: errors.array(), 
-            message: 'Invalid data while registration. Please try again'
-        })
+      return res.status(400).json({
+          errors: errors.array(), 
+          message: 'Invalid data while registration. Please try again'
+      })
     }
 
     const { name, email, password } = req.body
@@ -63,7 +63,7 @@ module.exports.register = async (req, res) => {
     })
 
     if(candidate){
-        return res.status(400).json({ message: "This user already exists" })
+      return res.status(400).json({ message: "This user already exists" })
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)

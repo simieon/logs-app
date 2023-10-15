@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Input, Card, Row, Col, Typography, Divider } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined} from '@ant-design/icons';
 import { IRegister, IRegistrationFormData } from './interfaces';
-import { ValidationError } from '../../components/validation/ValidationError';
+import { ValidationError } from '../../components/ValidationError';
 import { message } from 'antd';
-import { useHttp } from '../../hooks/http/http.hook';
+import { useHttp } from '../../hooks/http.hook';
 import { keys } from '../../config/default';
+import { useAuthValidation } from '../../hooks/authValidation.hook';
 
 export const RegisterPage:React.FC = () =>{
   const { loading, error, request, clearError} = useHttp()
 
-  const [passwordsMatch, setPasswordsMatch] = useState<boolean>(true)
-  const [validEmail, setValidEmail] = useState<boolean>(true)
-  const [validPassword, setValidPassword] = useState<boolean>(true)
+  const { validName, validEmail, validPassword, passwordsMatch, validateFormRegister } = useAuthValidation()
   const [formData, setFormData] = useState<IRegistrationFormData>({
     name: '',
     email: '',
@@ -22,7 +21,6 @@ export const RegisterPage:React.FC = () =>{
   })
 
   const navigate = useNavigate()
-
 
   useEffect(() => {
     if (error) {
@@ -34,75 +32,31 @@ export const RegisterPage:React.FC = () =>{
     }
   }, [clearError,error])
 
-  const isEmailValid = (email: string): boolean => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
-    return emailRegex.test(email)
-  }
-
-  const handleEmailBlur = () => {
-    if (formData.email === '') {
-      setValidEmail(true)
-    } else {
-      setValidEmail(isEmailValid(formData.email))
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault() 
-
-    const value = e.target.value
-    setValidEmail(true)
-    setFormData({ ...formData, email: value })
-  }
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-
-    const value = e.target.value
-    setValidPassword(e.target.value.length >= 6)
-    setFormData({ ...formData, password: value })
-    setPasswordsMatch(formData.confirmPassword === value)
-  }
-
-  const handlePasswordBlur = () => {
-    setValidPassword(formData.password.length >= 6 || formData.password === '')
-  }
-  
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-
-    const value = e.target.value
-    setFormData({ ...formData, confirmPassword: value })
-    setPasswordsMatch(value === formData.password)
+  const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) =>{
+    setFormData({ ...formData, [e.target.name]: e.target.value})
   }
 
   const handleSubmit = async () => {
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordsMatch(false)
-      return
-    }
-    if (!isEmailValid(formData.email)) {
-      setValidEmail(false)
-      return
-    }
-    if (formData.password.length < 6) {
-      setValidPassword(false)
+    const { isValidEmail, isPasswordsMatch, isValidName, isValidPassword } = await validateFormRegister(formData)
+
+    if (!isValidPassword || !isPasswordsMatch || !isValidEmail || !isValidName) {
       return
     }
 
     try {
+
       const registerData: IRegister = { ...formData }
 
       await request(keys.url + '/api/auth/register', 'POST', { ...registerData })
 
       message.open({
         type: 'success',
-        content: 'Successful register'
+        content: 'Successful registration'
       })
-      
     } catch (e) {
-      
+      console.log(e)
     }
+    setFormData({name: '', password: '', email: '', confirmPassword: ''} as IRegistrationFormData)
   }
 
 
@@ -114,13 +68,15 @@ export const RegisterPage:React.FC = () =>{
         </Typography.Title>
         <Divider />
         <Card title='Sign Up'>
-        <Input
+          <Input
             prefix={<UserOutlined className="site-form-item-icon" />}
             placeholder="Username"
             name='name'
+            className={`${!validName ? 'input-error' : ''}`}
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={changeHandler}
           />
+          <ValidationError condition={!validName} text='Username should not be empty.'/>
           <Input
             prefix={<MailOutlined className="site-form-item-icon" />}
             placeholder="Email"
@@ -128,8 +84,7 @@ export const RegisterPage:React.FC = () =>{
             name='email'
             className={`mt-1 ${!validEmail ? 'input-error' : ''}`}
             value={formData.email}
-            onChange={handleEmailChange}
-            onBlur={handleEmailBlur}
+            onChange={changeHandler}
           />
           <ValidationError condition={!validEmail} text='Invalid email format.'/>
           <Input.Password
@@ -139,8 +94,7 @@ export const RegisterPage:React.FC = () =>{
             className={`mt-1 ${!validPassword || 
               (!passwordsMatch && formData.confirmPassword.length > 0) ? 'input-error' : ' '}`}
             value={formData.password}
-            onChange={handlePasswordChange}
-            onBlur={handlePasswordBlur}
+            onChange={changeHandler}
           />
           <ValidationError condition={!validPassword} text='Password must be at least 6 characters long.'/>
           <Input.Password
@@ -150,7 +104,7 @@ export const RegisterPage:React.FC = () =>{
             className={`mt-1 ${!passwordsMatch && 
               formData.confirmPassword.length > 0 ? 'input-error' : ''}`}
             value={formData.confirmPassword}
-            onChange={handleConfirmPasswordChange}
+            onChange={changeHandler}
           />
           <Button
             type="primary"

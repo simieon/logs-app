@@ -1,6 +1,9 @@
 import React, {useState} from "react";
 import { Input } from 'antd';
-import { ILogsFormProps } from "./interfaces";
+
+interface ILogsFormProps{
+  onAdd:(content: string) => void
+}
 
 const { Search } = Input;
 
@@ -28,6 +31,7 @@ export const LogsForm: React.FC<ILogsFormProps> = (props) => {
         id="content"
         placeholder="Enter the log content"
         onSearch={value => onSearchHandler()} 
+        value={content}
         enterButton="Enter" 
         onKeyUp={keyUpHandler}
         onChange={changeHandler}

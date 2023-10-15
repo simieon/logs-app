@@ -1,9 +1,13 @@
 import { useState, useCallback, useEffect } from "react";
-import { IAuthData } from "./interfaces";
-import { keys } from "../../config/default";
+import { keys } from "../config/default";
 
 const storageName:string = keys.storageName
 
+
+interface IAuthData {
+  userId: string | null;
+  token: string | null;
+}
 
 export const useAuth = () => {
   const [token, setToken] = useState<string | null>(null)

@@ -1,12 +1,12 @@
 import { createContext } from "react";
-import { AuthContextType } from "./types";
+import { IAuthContext } from "./interfaces";
 
-const noop = () => {};
 
-export const AuthContext = createContext<AuthContextType>({
+
+export const AuthContext = createContext<IAuthContext>({
   token: null,
   userId: null,
-  login: noop,
-  logout: noop,
+  login: () => {},
+  logout: () => {},
   isAuthenticated: false,
 });

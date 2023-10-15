@@ -20,7 +20,7 @@ module.exports = passport => {
                 if (user){
                     done(null, user)
                 } else {
-                    done(null, false)
+                    done(null, false, { message: 'Unauthorized', status: 401 })
                 }
             }
             catch(e){

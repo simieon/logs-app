@@ -1,4 +1,8 @@
-import { IValidationError } from "./interfaces"
+
+interface IValidationError{
+  condition: boolean,
+  text:string
+}
 
 export const ValidationError:React.FC<IValidationError> = (props) => {
   return (
