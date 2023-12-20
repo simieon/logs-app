@@ -87,9 +87,9 @@ module.exports.register = async (req, res) => {
     }
     
     //to pass validation 
-    const userRoleInstance = await db.tbl_user_role.build(user_role);
-    await userRoleInstance.validate();
-    await userRoleInstance.save();
+    const userRoleInstance = await db.tbl_user_role.build(user_role)
+    await userRoleInstance.validate()
+    await userRoleInstance.save()
 
     res.status(201).json({ message: "User has been registered" })
   } catch (e) {

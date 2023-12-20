@@ -12,7 +12,7 @@ import { useAuthValidation } from '../../hooks/authValidation.hook';
 export const RegisterPage:React.FC = () =>{
   const { loading, error, request, clearError} = useHttp()
 
-  const { validName, validEmail, validPassword, passwordsMatch, validateFormRegister } = useAuthValidation()
+  const { validName, validEmail, validPassword, passwordsMatch, validateForm } = useAuthValidation()
   const [formData, setFormData] = useState<IRegistrationFormData>({
     name: '',
     email: '',
@@ -37,7 +37,7 @@ export const RegisterPage:React.FC = () =>{
   }
 
   const handleSubmit = async () => {
-    const { isValidEmail, isPasswordsMatch, isValidName, isValidPassword } = await validateFormRegister(formData)
+    const { isValidEmail, isPasswordsMatch, isValidName, isValidPassword } = await validateForm(formData)
 
     if (!isValidPassword || !isPasswordsMatch || !isValidEmail || !isValidName) {
       return

@@ -10,7 +10,7 @@ export const useRoutes = (isAuthenticated: boolean) =>{
     return(
       <Routes>
         <Route path="/main" element={<MainPage />} />
-        <Route path="/*" element={<Navigate to="/main"/>} />
+        {/* <Route path="/*" element={<Navigate to="/main"/>} /> */}
       </Routes>
     )
   }

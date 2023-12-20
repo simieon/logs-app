@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ILogin, IRegistrationFormData } from "../pages/auth/interfaces";
+import { ILoginFormData, IRegistrationFormData } from "../pages/auth/interfaces";
 
 
 export const useAuthValidation = () => {
@@ -13,33 +13,35 @@ export const useAuthValidation = () => {
     return emailRegex.test(email)
   }
 
-  const validatePassword = (password:string): boolean => password.length >= 6
-
-  const validateFormRegister = async(formData:IRegistrationFormData) => {
-    const { name, email, password, confirmPassword } = formData
-    setValidName(name.trim().length !== 0)
-    setValidEmail(validateEmail(email))
-    setValidPassword(validatePassword(password))
-    setPasswordMatch(confirmPassword === password)
-
-    const isValidName = name.trim().length !== 0
-    const isValidEmail = validateEmail(email)
-    const isValidPassword = validatePassword(password)
-    const isPasswordsMatch = confirmPassword === password
-    
-    return { isValidName, isValidEmail, isPasswordsMatch, isValidPassword }
-  }
-
-  const validateFormLogin = async(formData:ILogin) => {
-    const { email, password } = formData
-    setValidEmail(validateEmail(email))
-    setValidPassword(validatePassword(password))
+  const validateForm = async(formData: IRegistrationFormData | ILoginFormData) => {
+    const {email, password} = formData
 
     const isValidEmail = validateEmail(email)
-    const isValidPassword = validatePassword(password)
-    
-    return { isValidEmail, isValidPassword }
+    const isValidPassword = password.length >= 8
+
+    setValidEmail(isValidEmail)
+    setValidPassword(isValidPassword)
+
+    if ('name' in formData && 'confirmPassword' in formData) {
+      const {name, confirmPassword} = formData
+
+      const isValidName = name.trim().length !== 0
+      const isPasswordsMatch = confirmPassword === password
+
+      setValidName(isValidName)
+      setPasswordMatch(isPasswordsMatch)
+
+      return {isValidName, isValidEmail, isValidPassword, isPasswordsMatch}
+    }
+
+    return {isValidEmail, isValidPassword}
   }
 
-  return { validName, passwordsMatch, validEmail, validPassword, validateFormRegister, validateFormLogin }
-};
+  return {
+    validName,
+    validEmail,
+    validPassword,
+    passwordsMatch,
+    validateForm
+  }
+}

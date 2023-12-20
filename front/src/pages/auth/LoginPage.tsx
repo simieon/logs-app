@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Card, Row, Col, Typography, Divider } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { ILogin } from './interfaces';
+import { ILogin, ILoginFormData } from './interfaces';
 import { ValidationError } from '../../components/ValidationError';
 import { useHttp } from '../../hooks/http.hook';
 import { message } from 'antd';
@@ -17,8 +17,8 @@ export const LoginPage:React.FC = () => {
   const auth = useContext<IAuthContext>(AuthContext)
   const { loading, error, request, clearError} = useHttp()
 
-  const { validEmail, validPassword, validateFormLogin } = useAuthValidation()
-  const [formData, setFormData] = useState<ILogin>({
+  const { validEmail, validPassword, validateForm } = useAuthValidation()
+  const [formData, setFormData] = useState<ILoginFormData>({
     email: '',
     password: '',
   })
@@ -41,7 +41,7 @@ export const LoginPage:React.FC = () => {
   }
 
   const handleSubmit = async() => { 
-    const { isValidEmail, isValidPassword } = await validateFormLogin(formData)
+    const { isValidEmail, isValidPassword } = await validateForm(formData)
 
     if (!isValidPassword || !isValidEmail) {
       return
@@ -49,7 +49,7 @@ export const LoginPage:React.FC = () => {
 
     try {
 
-      const data = await request(keys.url + '/api/auth/login', 'POST', {...formData})
+      const data = await request(keys.url + '/api/auth/login', 'POST', {...formData} as ILogin)
 
       await auth.login(data.token, data.userId)
       

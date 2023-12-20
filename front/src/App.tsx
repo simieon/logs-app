@@ -6,10 +6,14 @@ import { AuthContext } from './context/AuthContext';
 import { IAuthContext } from './context/interfaces';
 
 
-const App: React.FC = () => {
-  const { token, userId, login, logout } = useAuth()
+const App = () => {
+  const { token, userId, login, logout, ready } = useAuth()
   const isAuthenticated = !!token
   const routes = useRoutes(isAuthenticated)
+
+  if(!ready){
+    return <p>Loading...</p>
+  }
 
   return (
     <AuthContext.Provider value={{
